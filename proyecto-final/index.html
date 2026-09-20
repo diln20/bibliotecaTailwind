@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tailwind Academy</title>
+  <link href="/src/input.css" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+  <header class="border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+    <nav class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4" aria-label="Principal">
+      <a href="#" class="font-black tracking-tight">Tailwind <span class="text-brand-500">Academy</span></a>
+      <div class="flex items-center gap-5 text-sm font-semibold text-slate-600 dark:text-slate-300">
+        <a class="hover:text-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-200" href="#cursos">Cursos</a>
+        <a class="hover:text-brand-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-200" href="#inscripcion">Inscripción</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="bg-slate-950 text-white">
+      <div class="mx-auto max-w-6xl px-6 py-20 md:py-28">
+        <span class="text-sm font-bold uppercase tracking-[.2em] text-brand-400">Proyecto final</span>
+        <h1 class="mt-4 max-w-4xl text-4xl font-black tracking-tight md:text-6xl">Aprende Tailwind CSS construyendo una interfaz real</h1>
+        <p class="mt-6 max-w-2xl text-lg text-slate-300">Una ruta progresiva desde utilidades básicas hasta responsive, dark mode, accesibilidad y producción.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#cursos" class="rounded-xl bg-brand-500 px-5 py-3 font-bold text-slate-950 transition hover:bg-brand-400 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300">Explorar cursos</a>
+          <a href="#inscripcion" class="rounded-xl border border-slate-700 px-5 py-3 font-bold transition hover:bg-slate-900 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-500">Inscribirme</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="cursos" class="mx-auto max-w-6xl px-6 py-16">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="text-sm font-bold uppercase tracking-widest text-brand-700">Ruta</p>
+          <h2 class="mt-2 text-3xl font-black tracking-tight">Cursos recomendados</h2>
+        </div>
+        <span class="hidden text-sm text-slate-500 md:block">3 niveles</span>
+      </div>
+      <div class="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+          <span class="rounded-full bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">Básico</span>
+          <h3 class="mt-4 text-xl font-bold">Utilidades esenciales</h3><p class="mt-2 text-slate-600 dark:text-slate-400">Colores, tipografía, spacing y componentes visuales.</p>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+          <span class="rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">Intermedio</span>
+          <h3 class="mt-4 text-xl font-bold">Layout y responsive</h3><p class="mt-2 text-slate-600 dark:text-slate-400">Flex, Grid, breakpoints, estados y modo oscuro.</p>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+          <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Proyecto</span>
+          <h3 class="mt-4 text-xl font-bold">Interfaz de producción</h3><p class="mt-2 text-slate-600 dark:text-slate-400">Tema, accesibilidad y build final con Vite.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="inscripcion" class="mx-auto max-w-6xl px-6 pb-20">
+      <div class="grid gap-8 rounded-3xl bg-slate-100 p-6 md:grid-cols-2 md:p-10 dark:bg-slate-900">
+        <div><p class="text-sm font-bold uppercase tracking-widest text-brand-700">Siguiente paso</p><h2 class="mt-2 text-3xl font-black">Practica con un proyecto propio</h2><p class="mt-4 text-slate-600 dark:text-slate-400">Cambia la marca, los cursos y la paleta manteniendo los patrones aprendidos.</p></div>
+        <form>
+          <label for="correo" class="block text-sm font-bold">Correo</label>
+          <input id="correo" type="email" class="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-cyan-100" placeholder="nombre@correo.com">
+          <button class="mt-4 rounded-xl bg-slate-950 px-5 py-3 font-bold text-white transition hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-cyan-300 dark:bg-brand-500 dark:text-slate-950">Inscribirme</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 px-6 py-8 text-center text-sm text-slate-500 dark:border-slate-800">Tailwind Academy · Proyecto educativo</footer>
+</body>
+</html>
