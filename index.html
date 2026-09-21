@@ -162,54 +162,91 @@ function utilityCatalog(p){
   if(f==='scale-*')return prefixed(['scale'],['0','50','75','90','95','100','105','110','125','150','200']);
   if(f==='rotate-*')return ['rotate-0','rotate-1','rotate-2','rotate-3','rotate-6','rotate-12','rotate-45','rotate-90','rotate-180','-rotate-45','-rotate-90'];
   if(f==='origin-*')return ['origin-center','origin-top','origin-top-right','origin-right','origin-bottom-right','origin-bottom','origin-bottom-left','origin-left','origin-top-left'];
+  if(f==='hover:*')return ['hover:bg-cyan-500','hover:bg-violet-500','hover:text-white','hover:scale-105','hover:shadow-lg','hover:opacity-70'];
+  if(f==='focus-visible:*')return ['focus-visible:outline-none','focus-visible:ring-2','focus-visible:ring-4','focus-visible:ring-cyan-500','focus-visible:border-cyan-500'];
+  if(f==='active:*')return ['active:scale-95','active:bg-cyan-700','active:opacity-70','active:shadow-inner'];
+  if(f==='disabled:*')return ['disabled:opacity-50','disabled:cursor-not-allowed','disabled:bg-slate-200','disabled:text-slate-400'];
+  if(f.includes('group + group-hover'))return ['group-hover:bg-cyan-500','group-hover:text-white','group-hover:translate-x-2','group-hover:scale-105','group-hover:opacity-100'];
+  if(f.includes('peer + peer-'))return ['peer-checked:bg-cyan-500','peer-checked:text-white','peer-checked:translate-x-5','peer-focus:ring-2','peer-disabled:opacity-50'];
   if(f.includes('appearance-'))return ['appearance-none','appearance-auto'];
+  if(f==='placeholder:*')return colorUtilities('placeholder:text');
   if(f==='resize-*')return ['resize-none','resize','resize-x','resize-y'];
   if(f.includes('sm:, md:'))return ['sm:','md:','lg:','xl:','2xl:'].flatMap(v=>[v+'block',v+'hidden',v+'grid-cols-2',v+'grid-cols-3',v+'text-lg']);
   if(f.startsWith('max-sm:'))return ['max-sm:hidden','max-md:hidden','max-lg:hidden','max-xl:hidden','max-2xl:hidden'];
+  if(f.includes('@container + @sm'))return ['@sm:grid-cols-2','@md:grid-cols-3','@lg:grid-cols-4','@sm:text-lg','@md:bg-cyan-100','@lg:bg-violet-100'];
   if(f==='dark:*')return ['dark:bg-slate-950','dark:bg-slate-900','dark:text-white','dark:text-slate-200','dark:border-slate-700','dark:hover:bg-slate-800'];
   if(f.startsWith('transition'))return ['transition','transition-all','transition-colors','transition-opacity','transition-shadow','transition-transform','transition-none'];
   return [];
 }
-function utilitySwatchClass(cls){return /^(bg-|text-|border-|ring-|accent-|caret-)/.test(cls)?cls:'';}
+function utilitySwatchClass(cls){const base=(cls||'').split(':').pop();if(base.startsWith('bg-'))return base;const m=base.match(/^(?:text|border|ring|accent|caret)-(.+)$/);return m?'bg-'+m[1]:'';}
 function demoBox(label,extra=''){return `<div class="${extra} flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-cyan-300 bg-cyan-100 px-3 py-2 text-xs font-black text-cyan-950 shadow-sm">${label}</div>`;}
+function bgContrastClass(cls){
+  if(cls==='bg-black')return 'text-white';
+  if(cls==='bg-white'||cls==='bg-transparent')return 'text-slate-900';
+  const m=cls.match(/^bg-([a-z]+)-(\d{2,3})$/); if(!m)return 'text-slate-900';
+  const [,c,n]=m, shade=Number(n); const light=['amber','yellow','lime','cyan','sky','orange'];
+  return shade>=700 || (shade>=600&&!light.includes(c)) ? 'text-white' : 'text-slate-950';
+}
 function utilityDemoDescription(p,cls){
   const f=(p.family||'').toLowerCase();
   if(f==='items-*')return `La clase <code>${esc(cls)}</code> está aplicada al <b>contenedor flex</b>. Las cajas hijas tienen alturas diferentes para que se vea la alineación en el eje cruzado.`;
-  if(f==='justify-*')return `La clase <code>${esc(cls)}</code> está aplicada al <b>contenedor flex</b>. Hay tres cajas para que puedas comparar cómo se reparte el espacio horizontal.`;
+  if(f==='justify-*')return `La clase <code>${esc(cls)}</code> está aplicada al <b>contenedor flex</b>. Hay tres cajas para comparar cómo se reparte el espacio horizontal.`;
   if(f.includes('flex-row'))return `La clase <code>${esc(cls)}</code> controla la <b>dirección del contenedor flex</b>. Observa el orden A → B → C y si fluye por fila o columna.`;
-  if(f.includes('flex-wrap'))return `La clase <code>${esc(cls)}</code> se aplica a un contenedor estrecho con varias cajas. Así puedes ver cuándo los elementos saltan a otra línea.`;
-  if(f.startsWith('gap-'))return `La clase <code>${esc(cls)}</code> se aplica al <b>contenedor</b>. Las cuatro cajas permiten ver claramente la separación entre elementos.`;
-  if(f==='grid-cols-*')return `La clase <code>${esc(cls)}</code> define las columnas de una cuadrícula con seis elementos. Cambia entre 1, 2, 3… para ver cómo se redistribuyen.`;
-  if(f==='grid-rows-*')return `La clase <code>${esc(cls)}</code> define las filas. La cuadrícula usa flujo por columnas para que el número de filas sea fácil de reconocer.`;
-  if(f==='place-items-*')return `La clase <code>${esc(cls)}</code> alinea cada elemento dentro de su celda de Grid, tanto horizontal como verticalmente.`;
-  if(f.includes('col-span'))return `La clase <code>${esc(cls)}</code> se aplica a la caja destacada dentro de un Grid de 4 columnas. Observa cuántas columnas ocupa o desde dónde empieza/termina.`;
-  if(f.includes('row-span'))return `La clase <code>${esc(cls)}</code> se aplica a la caja destacada dentro de un Grid con filas definidas. Observa cuántas filas ocupa.`;
-  if(f.includes('grow /'))return `La clase <code>${esc(cls)}</code> está aplicada a la caja B dentro de un contenedor flex de ancho limitado, para que notes cuánto crece o se encoge respecto a sus hermanas.`;
-  if(f==='basis-*')return `La clase <code>${esc(cls)}</code> está aplicada a la primera caja y define su tamaño base antes de repartir el espacio flex.`;
-  if(f==='order-*')return `La clase <code>${esc(cls)}</code> se aplica a B. El número pequeño indica el orden original del HTML para que compares el orden visual.`;
-  if(f.includes('text-left'))return `La clase <code>${esc(cls)}</code> se aplica a un párrafo de varias líneas dentro de una caja ancha para que la alineación sea evidente.`;
-  if(f==='leading-*')return `La clase <code>${esc(cls)}</code> se aplica a un párrafo de varias líneas. Observa la distancia vertical entre una línea y la siguiente.`;
-  if(f==='tracking-*')return `La clase <code>${esc(cls)}</code> controla el espacio horizontal entre letras de la misma palabra.`;
-  if(f==='overflow-*')return `La clase <code>${esc(cls)}</code> se aplica a una caja pequeña cuyo contenido es más grande. Así puedes ver recorte, scroll o desbordamiento.`;
-  if(f==='aspect-*')return `La clase <code>${esc(cls)}</code> controla la proporción ancho/alto de la tarjeta. El ancho se mantiene fijo para comparar la altura resultante.`;
-  if(f==='object-*')return `La clase <code>${esc(cls)}</code> se aplica a una imagen dentro de un marco fijo, para mostrar cómo se adapta sin cambiar el tamaño del marco.`;
-  if(f.includes('object-* position'))return `La imagen usa <code>object-cover</code> y <code>${esc(cls)}</code> decide qué parte queda visible dentro del marco.`;
-  if(f==='z-*')return `La clase <code>${esc(cls)}</code> se aplica a la tarjeta cyan que se superpone con otra tarjeta; así se aprecia el orden de apilamiento.`;
+  if(f.includes('flex-wrap'))return `La clase <code>${esc(cls)}</code> se aplica a un contenedor estrecho con varias cajas. Así se ve cuándo los elementos saltan a otra línea.`;
+  if(f.startsWith('gap-'))return `La clase <code>${esc(cls)}</code> está en un Grid 2×2 para que puedas distinguir <code>gap</code>, <code>gap-x</code> y <code>gap-y</code>.`;
+  if(f==='grid-cols-*')return `La clase <code>${esc(cls)}</code> define las columnas de una cuadrícula con seis elementos. Las variantes <code>subgrid</code> se muestran dentro de un Grid padre real.`;
+  if(f==='grid-rows-*')return `La clase <code>${esc(cls)}</code> define las filas. Las variantes <code>subgrid</code> se muestran dentro de un Grid padre real.`;
+  if(f==='place-items-*')return `La clase <code>${esc(cls)}</code> alinea cada elemento dentro de su celda. Los elementos no tienen tamaño fijo para que <code>stretch</code> también se note.`;
+  if(f.includes('col-span'))return `La caja ámbar es el elemento de prueba dentro de un Grid de 12 columnas. <code>${esc(cls)}</code> cambia su span o su línea de inicio/fin.`;
+  if(f.includes('row-span'))return `La caja ámbar es el elemento de prueba dentro de un Grid de 12 filas. <code>${esc(cls)}</code> cambia su span o su línea de inicio/fin.`;
+  if(f.includes('grow /'))return cls.startsWith('shrink')?`Las cajas son deliberadamente anchas dentro de un contenedor estrecho. Así <code>${esc(cls)}</code> muestra si B puede encogerse o conserva su ancho.`:`Hay espacio libre en el contenedor. <code>${esc(cls)}</code> se aplica a B para mostrar cuánto espacio adicional puede ocupar.`;
+  if(f==='basis-*')return `La clase <code>${esc(cls)}</code> se aplica a la primera caja y define su tamaño base antes de repartir el espacio flex.`;
+  if(f==='order-*')return `La clase <code>${esc(cls)}</code> se aplica a B. Las etiquetas indican el orden original del HTML para comparar el orden visual.`;
+  if(f.includes('text-left'))return `La clase <code>${esc(cls)}</code> se aplica a un párrafo de varias líneas para que la alineación sea evidente.`;
+  if(f==='leading-*')return `La clase <code>${esc(cls)}</code> se aplica a un párrafo de varias líneas. Observa la distancia vertical entre líneas.`;
+  if(f==='tracking-*')return `La clase <code>${esc(cls)}</code> controla el espacio horizontal entre letras.`;
+  if(f==='overflow-*')return `La caja interior es más grande que el marco. <code>${esc(cls)}</code> permite ver recorte, desbordamiento o barras de scroll.`;
+  if(f==='aspect-*')return `El ancho se mantiene fijo y <code>${esc(cls)}</code> cambia la proporción ancho/alto para que compares la altura resultante.`;
+  if(f==='object-*')return `La imagen tiene un marco fijo. <code>${esc(cls)}</code> cambia cómo la imagen se adapta dentro de él.`;
+  if(f.includes('object-* position'))return `La imagen usa <code>object-cover</code>; <code>${esc(cls)}</code> decide qué zona de la imagen queda priorizada dentro del marco.`;
+  if(f==='z-*')return `La tarjeta cyan se superpone con otra. <code>${esc(cls)}</code> permite ver cuál queda por encima.`;
   if(['relative','absolute','fixed','sticky'].includes(f)){
-    if(cls==='static')return `<code>static</code> mantiene el elemento en el flujo normal. La caja aparece entre otros elementos y no responde a top/right/bottom/left.`;
-    if(cls==='relative')return `<code>relative</code> mantiene la caja en el flujo y crea un contexto de posicionamiento. El badge de la esquina usa <code>absolute</code> y toma esta tarjeta como referencia.`;
-    if(cls==='absolute')return `<code>absolute</code> saca la caja del flujo normal. En la demo está anclada con <code>top-3 right-3</code> dentro de un padre <code>relative</code>.`;
-    if(cls==='fixed')return `<code>fixed</code> normalmente se posiciona respecto al viewport real. Para no sacar el botón fuera de la guía, aquí se muestra una <b>simulación de mini viewport</b>: el botón representa cómo permanecería anclado abajo a la derecha mientras la página se desplaza.`;
-    if(cls==='sticky')return `<code>sticky</code> conserva su lugar en el flujo y, al llegar a <code>top-0</code>, queda pegado dentro de su contenedor con scroll. Desplaza el área de la demo para comprobarlo.`;
+    if(cls==='static')return `<code>static</code> mantiene el elemento en el flujo normal. La caja aparece entre sus vecinos.`;
+    if(cls==='relative')return `<code>relative</code> mantiene la caja en el flujo y crea un contexto para un hijo <code>absolute</code>.`;
+    if(cls==='absolute')return `<code>absolute</code> saca la caja del flujo. En la demo está anclada con <code>top-3 right-3</code> dentro de un padre <code>relative</code>.`;
+    if(cls==='fixed')return `<code>fixed</code> normalmente se posiciona respecto al viewport real. Aquí usamos un <b>mini viewport simulado</b> para no sacar el botón fuera de la guía.`;
+    if(cls==='sticky')return `<code>sticky</code> conserva su lugar y se pega a <code>top-0</code> al hacer scroll dentro de la caja. Desplázala para comprobarlo.`;
   }
-  if(f.includes('inset-*'))return `La clase <code>${esc(cls)}</code> mueve una caja con <code>absolute</code> dentro de un contenedor <code>relative</code>.`;
+  if(f.includes('inset-*'))return `La clase <code>${esc(cls)}</code> se aplica a un elemento <code>absolute</code> dentro de un marco <code>relative</code>. Las guías centrales ayudan a identificar su desplazamiento.`;
   if(f==='w-*'||f==='h-*'||f.includes('max-w')||f.includes('min-w')||f.includes('min-h')||f.includes('max-h'))return `La clase <code>${esc(cls)}</code> se aplica al bloque cyan dentro de un marco de referencia para comparar su tamaño.`;
+  if(f==='ring-*')return `El botón usa un ring visible. Si eliges un color cambia el color del ring; si eliges un grosor cambia su espesor.`;
+  if(f.includes('appearance-'))return `Compara el <code>select</code> de prueba con el select de referencia. <code>appearance-none</code> elimina la apariencia nativa que controla el navegador.`;
+  if(f==='accent-*')return `La clase <code>${esc(cls)}</code> está aplicada a controles nativos (checkbox, radio y range) para que veas el color de acento.`;
+  if(f==='caret-*')return `Haz clic dentro del campo de texto: <code>${esc(cls)}</code> cambia el color del cursor de escritura (caret).`;
+  if(f==='placeholder:*')return `La utilidad <code>${esc(cls)}</code> se aplica al placeholder del campo. El texto escrito conserva otro color para que puedas diferenciarlos.`;
+  if(f==='resize-*')return `La clase <code>${esc(cls)}</code> se aplica a un <code>textarea</code> con overflow. Intenta arrastrar su esquina inferior derecha.`;
+  if(f==='origin-*')return `La tarjeta está rotada respecto a una silueta de referencia. <code>${esc(cls)}</code> cambia el punto alrededor del cual ocurre la transformación.`;
+  if(f==='duration-*')return `Pasa el cursor por la pista. <code>${esc(cls)}</code> cambia cuánto tarda el movimiento.`;
+  if(f==='ease-*')return `Pasa el cursor por la pista. <code>${esc(cls)}</code> cambia la curva de aceleración/desaceleración.`;
+  if(f==='delay-*')return `Pasa el cursor por la pista. <code>${esc(cls)}</code> cambia cuánto espera antes de iniciar el movimiento.`;
+  if(f.startsWith('transition'))return `Pasa el cursor por la tarjeta. Se modifican color, opacidad, sombra y posición; <code>${esc(cls)}</code> determina cuáles propiedades se animan.`;
+  if(f==='hover:*')return `Pasa el cursor sobre el botón para activar <code>${esc(cls)}</code>.`;
+  if(f==='focus-visible:*')return `Usa la tecla <b>Tab</b> para enfocar el botón y observar <code>${esc(cls)}</code>.`;
+  if(f==='active:*')return `Mantén presionado el botón con el mouse o dedo para observar <code>${esc(cls)}</code>.`;
+  if(f==='disabled:*')return `El primer botón está deshabilitado y tiene <code>${esc(cls)}</code>; el segundo queda habilitado como referencia.`;
+  if(f.includes('group + group-hover'))return `Pasa el cursor sobre toda la tarjeta <code>group</code>. El elemento hijo contiene <code>${esc(cls)}</code>.`;
+  if(f.includes('peer + peer-'))return `Activa o enfoca el checkbox <code>peer</code>. La tarjeta vecina contiene <code>${esc(cls)}</code>.`;
+  if(f.includes('sm:, md:'))return `Esta demo usa el <b>viewport real del navegador</b>. La variante <code>${esc(cls)}</code> solo se activa cuando se cumple su breakpoint.`;
+  if(f.startsWith('max-sm:'))return `Esta demo usa el <b>viewport real</b>. <code>${esc(cls)}</code> se aplica únicamente por debajo del breakpoint máximo indicado.`;
+  if(f.includes('@container + @sm'))return `El marco cyan es un contenedor con <code>@container</code> y se puede redimensionar horizontalmente. Arrastra su esquina para cruzar el tamaño de <code>${esc(cls)}</code>.`;
+  if(f==='dark:*')return `Se muestran dos mini estados lado a lado. La tarjeta “oscuro” simula el resultado de <code>${esc(cls)}</code> sin depender del tema del sistema.`;
   return `Vista previa de <code>${esc(cls)}</code>. Cambia de opción en el buscador y compara el resultado visual.`;
 }
 function utilityDemoMarkup(cls,p){
   const f=(p.family||'').toLowerCase();
-  if(cls.startsWith('bg-'))return `<div class="utility-demo-target ${cls} text-slate-900">${esc(cls)}</div>`;
-  if(cls.startsWith('text-')&&!/^text-(xs|sm|base|lg|[2-9]xl|left|center|right|justify|start|end)/.test(cls))return `<div class="utility-demo-target bg-slate-100 ${cls}">${esc(cls)}</div>`;
+  if(cls==='bg-current')return `<div class="utility-demo-target bg-current text-cyan-500 shadow-sm"><span class="rounded bg-white/80 px-2 py-1 text-slate-950">bg-current · currentColor cyan</span></div>`;
+  if(cls.startsWith('bg-'))return `<div class="utility-demo-target ${cls} ${bgContrastClass(cls)} shadow-sm">${esc(cls)}</div>`;
+  if(cls.startsWith('text-')&&!/^text-(xs|sm|base|lg|[2-9]xl|left|center|right|justify|start|end)/.test(cls))return `<div class="grid w-full grid-cols-2 overflow-hidden rounded-xl border border-slate-300 text-lg font-black"><div class="grid min-h-24 place-items-center bg-white p-3 ${cls}">${esc(cls)}</div><div class="grid min-h-24 place-items-center bg-slate-950 p-3 ${cls}">${esc(cls)}</div></div>`;
   if(f.includes('text-xs'))return `<div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-slate-900"><div class="${cls} font-bold">Texto ${esc(cls)}</div><div class="mt-2 text-xs text-slate-500">Texto xs como referencia</div></div>`;
   if(f==='font-*')return `<div class="rounded-xl bg-slate-50 p-4 text-2xl text-slate-900 ${cls}">Aa 123 · ${esc(cls)}</div>`;
   if(f.includes('font-sans'))return `<div class="rounded-xl bg-slate-50 p-4 text-xl text-slate-900 ${cls}">Tailwind Academy · ${esc(cls)}</div>`;
@@ -217,50 +254,116 @@ function utilityDemoMarkup(cls,p){
   if(f==='leading-*')return `<p class="max-w-md rounded-xl bg-slate-50 p-4 text-sm text-slate-800 ${cls}">Primera línea del párrafo para observar el interlineado.<br>Segunda línea con el mismo tamaño de fuente.<br>Tercera línea para comparar mejor la separación.</p>`;
   if(f==='tracking-*')return `<div class="rounded-xl bg-slate-50 p-4 text-xl font-bold text-slate-900 ${cls}">TAILWIND ACADEMY</div>`;
   if(f.includes('underline'))return `<div class="rounded-xl bg-slate-50 p-4 text-xl font-bold text-slate-900 ${cls}">Decoración de texto</div>`;
-  if(cls.startsWith('border-')&&f==='border-{color}')return `<div class="utility-demo-target border-4 ${cls} bg-white text-slate-900">${esc(cls)}</div>`;
+  if(f==='border-{color}')return `<div class="utility-demo-target border-4 ${cls} bg-white text-slate-900">${esc(cls)}</div>`;
   if(f.startsWith('border,')||f.includes('border-2'))return `<div class="utility-demo-target ${cls} border-cyan-500 bg-white text-slate-900">${esc(cls)}</div>`;
   if(f.includes('border-solid'))return `<div class="utility-demo-target border-4 border-cyan-500 ${cls} bg-white text-slate-900">${esc(cls)}</div>`;
-  if(f==='padding'||f.startsWith('p-*'))return `<div class="border-2 border-dashed border-slate-300"><div class="${cls} bg-cyan-100 text-slate-900">Contenido</div></div>`;
-  if(f.startsWith('m-*'))return `<div class="border-2 border-dashed border-slate-300 bg-slate-50"><div class="${cls} bg-cyan-100 p-2 text-slate-900">Caja con ${esc(cls)}</div></div>`;
-  if(f.startsWith('gap-'))return `<div class="flex w-full flex-wrap rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3 ${cls}">${demoBox('A')}${demoBox('B')}${demoBox('C')}${demoBox('D')}</div>`;
+  if(f==='padding'||f.startsWith('p-*'))return `<div class="border-2 border-dashed border-slate-300 bg-slate-50"><div class="${cls} bg-cyan-100 text-slate-900"><span class="rounded bg-white px-2 py-1 text-xs font-bold">Contenido</span></div></div>`;
+  if(f.startsWith('m-*'))return `<div class="min-h-32 w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-1"><div class="${cls} w-28 rounded-lg bg-cyan-200 p-2 text-center text-xs font-bold text-slate-900">${esc(cls)}</div></div>`;
+  if(f.startsWith('gap-'))return `<div class="grid w-full grid-cols-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3 ${cls}">${demoBox('A')}${demoBox('B')}${demoBox('C')}${demoBox('D')}</div>`;
   if(f==='w-*')return `<div class="w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-2"><div class="${cls} max-w-full bg-cyan-500 p-2 text-center font-bold text-slate-950">${esc(cls)}</div></div>`;
   if(f==='h-*'||f.includes('min-h')||f.includes('max-h'))return `<div class="flex h-56 w-full items-start rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-2"><div class="${cls} max-h-full min-w-28 bg-cyan-500 p-2 text-center font-bold text-slate-950">${esc(cls)}</div></div>`;
   if(f.includes('max-w')||f.includes('min-w'))return `<div class="w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-2"><div class="${cls} bg-cyan-500 p-2 text-center font-bold text-slate-950">${esc(cls)} · contenido de referencia</div></div>`;
   if(f==='rounded-*'||f==='border-radius')return `<div class="utility-demo-target ${cls} bg-cyan-500 text-slate-950">${esc(cls)}</div>`;
-  if(f==='shadow-*')return `<div class="utility-demo-target ${cls} bg-white text-slate-900">${esc(cls)}</div>`;
-  if(f==='ring-*')return `<button class="rounded-lg bg-white px-5 py-3 font-bold text-slate-900 ${cls} ring-cyan-500">${esc(cls)}</button>`;
+  if(f==='shadow-*')return `<div class="utility-demo-target ${cls} border border-slate-100 bg-white text-slate-900">${esc(cls)}</div>`;
+  if(f==='ring-*'){
+    if(/^ring-(transparent|current|white|black|[a-z]+-\d+)/.test(cls))return `<button class="rounded-lg bg-white px-5 py-3 font-bold text-slate-900 ring-4 ${cls}">${esc(cls)}</button>`;
+    if(cls==='ring-inset')return `<button class="rounded-lg bg-white px-5 py-3 font-bold text-slate-900 ring-4 ring-inset ring-cyan-500">${esc(cls)}</button>`;
+    return `<button class="rounded-lg bg-white px-5 py-3 font-bold text-slate-900 ${cls} ring-cyan-500">${esc(cls)}</button>`;
+  }
   if(f==='opacity-*')return `<div class="flex items-center gap-4"><div class="rounded-lg bg-cyan-500 p-4 font-bold text-slate-950 ${cls}">${esc(cls)}</div><div class="rounded-lg bg-cyan-500 p-4 font-bold text-slate-950">100%</div></div>`;
-  if(f==='block'||f==='inline'||f==='inline-block'||f==='hidden'||f.includes('visible /'))return `<div class="w-full rounded-xl bg-slate-50 p-4 text-slate-900"><span class="rounded bg-amber-100 px-2 py-1">Antes</span> <span class="${cls} rounded bg-cyan-200 px-3 py-2 font-bold">Objetivo</span> <span class="rounded bg-rose-100 px-2 py-1">Después</span></div>`;
+  if(f==='block'||f==='inline'||f==='inline-block'||f==='hidden'){
+    if(cls==='flow-root')return `<div class="w-full rounded-xl bg-slate-50 p-4 text-slate-900"><div class="${cls} border-2 border-cyan-400 bg-cyan-50 p-2"><div class="float-left mr-2 h-14 w-14 rounded bg-cyan-400"></div><p class="text-xs">El padre con flow-root contiene el elemento flotante.</p></div></div>`;
+    if(cls==='contents')return `<div class="grid w-full grid-cols-3 gap-2 rounded-xl bg-slate-50 p-3"><div class="${cls} rounded-xl bg-cyan-200 p-3"><span class="rounded bg-cyan-500 p-2 font-bold">Hijo A</span><span class="rounded bg-violet-300 p-2 font-bold">Hijo B</span></div><span class="rounded bg-amber-200 p-2 font-bold">Hermano</span></div>`;
+    if(cls==='list-item')return `<ul class="w-full rounded-xl bg-slate-50 p-5 text-slate-900"><span class="${cls} list-disc">Elemento convertido en list-item</span></ul>`;
+    return `<div class="w-full rounded-xl bg-slate-50 p-4 text-slate-900"><span class="rounded bg-amber-100 px-2 py-1">Antes</span> <span class="${cls} rounded bg-cyan-200 px-3 py-2 font-bold">Objetivo</span> <span class="rounded bg-rose-100 px-2 py-1">Después</span></div>`;
+  }
+  if(f.includes('visible /')){
+    if(cls==='collapse')return `<table class="w-full max-w-md border-collapse text-left text-xs text-slate-900"><tbody><tr class="bg-slate-100"><td class="border p-3">Fila 1</td></tr><tr class="${cls} bg-cyan-100"><td class="border p-3 font-bold">Fila con collapse</td></tr><tr class="bg-slate-100"><td class="border p-3">Fila 3</td></tr></tbody></table>`;
+    return `<div class="flex w-full items-center gap-2 rounded-xl bg-slate-50 p-4 text-slate-900">${demoBox('A')}<div class="${cls} rounded-lg bg-cyan-500 px-4 py-3 font-black text-slate-950">Objetivo</div>${demoBox('C')}</div>`;
+  }
   if(['relative','absolute','fixed','sticky'].includes(f)){
     if(cls==='static')return `<div class="w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-slate-900"><div class="mb-2 rounded-lg bg-slate-200 p-2 text-xs font-bold">Elemento anterior</div><div class="static rounded-lg bg-cyan-500 p-3 text-center font-black text-slate-950 shadow-sm">static · sigo en el flujo</div><div class="mt-2 rounded-lg bg-slate-200 p-2 text-xs font-bold">Elemento siguiente</div></div>`;
     if(cls==='relative')return `<div class="w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-slate-900"><div class="relative min-h-28 rounded-xl border border-cyan-300 bg-cyan-50 p-4"><b>Tarjeta relative</b><p class="mt-2 text-xs text-slate-600">Sigue ocupando su espacio normal.</p><span class="absolute right-2 top-2 rounded-full bg-cyan-500 px-2 py-1 text-[10px] font-black text-slate-950">absolute hijo</span></div></div>`;
     if(cls==='absolute')return `<div class="relative h-40 w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-slate-900"><div class="text-xs font-bold text-slate-500">PADRE RELATIVE</div><div class="mt-8 rounded-lg bg-slate-200 p-3 text-xs">Contenido normal del padre</div><div class="absolute right-3 top-3 rounded-lg bg-cyan-500 px-4 py-3 text-center font-black text-slate-950 shadow-lg">absolute<br><span class="text-[10px] font-bold">top-3 right-3</span></div></div>`;
-    if(cls==='fixed')return `<div class="w-full max-w-xl overflow-hidden rounded-xl border-2 border-slate-400 bg-white shadow-sm"><div class="flex items-center gap-1 border-b border-slate-200 bg-slate-100 px-3 py-2"><span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span><span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span><span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span><span class="ml-2 text-[10px] font-black uppercase tracking-wide text-slate-500">mini viewport · simulación de fixed</span></div><div class="relative h-44 overflow-hidden bg-slate-50"><div class="space-y-2 p-4 pr-24 text-xs text-slate-600"><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div></div><div class="absolute bottom-3 right-3 rounded-full bg-cyan-500 px-4 py-3 text-center text-xs font-black text-slate-950 shadow-xl ring-4 ring-white">fixed<br><span class="text-[9px]">bottom-3 right-3</span></div><div class="absolute bottom-3 left-3 text-[10px] font-bold text-slate-400">El botón permanece pegado al viewport</div></div></div>`;
+    if(cls==='fixed')return `<div class="w-full max-w-xl overflow-hidden rounded-xl border-2 border-slate-400 bg-white shadow-sm"><div class="flex items-center gap-1 border-b border-slate-200 bg-slate-100 px-3 py-2"><span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span><span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span><span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span><span class="ml-2 text-[10px] font-black uppercase tracking-wide text-slate-500">mini viewport · simulación de fixed</span></div><div class="relative h-44 overflow-hidden bg-slate-50"><div class="space-y-2 p-4 pr-24 text-xs text-slate-600"><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div><div class="h-7 rounded bg-slate-200"></div></div><div class="absolute bottom-3 right-3 rounded-full bg-cyan-500 px-4 py-3 text-center text-xs font-black text-slate-950 shadow-xl ring-4 ring-white">fixed<br><span class="text-[9px]">bottom-3 right-3</span></div></div></div>`;
     if(cls==='sticky')return `<div class="h-48 w-full max-w-xl overflow-y-auto rounded-xl border-2 border-slate-300 bg-slate-50 text-slate-900"><div class="p-3 text-xs font-bold text-slate-500">↓ Haz scroll dentro de esta caja ↓</div><div class="sticky top-0 z-10 border-y border-cyan-300 bg-cyan-500 px-4 py-3 font-black text-slate-950 shadow-sm">sticky top-0 · me quedo arriba</div><div class="space-y-3 p-4">${['1','2','3','4','5','6','7','8'].map(n=>`<div class="rounded-lg border border-slate-200 bg-white p-3 text-xs font-bold text-slate-600">Contenido ${n}</div>`).join('')}</div></div>`;
   }
-  if(f.includes('inset-*'))return `<div class="relative h-40 w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"><div class="absolute ${cls} rounded-lg bg-cyan-500 p-2 font-bold text-slate-950">${esc(cls)}</div></div>`;
+  if(f.includes('inset-*')){
+    const axis=cls.startsWith('top-')?'left-4':cls.startsWith('right-')?'top-4':cls.startsWith('bottom-')?'left-4':cls.startsWith('left-')?'top-4':'';
+    return `<div class="relative h-52 w-full overflow-auto rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"><div class="absolute left-1/2 top-0 h-full border-l border-dashed border-slate-300"></div><div class="absolute left-0 top-1/2 w-full border-t border-dashed border-slate-300"></div><div class="absolute ${axis} ${cls} min-h-10 min-w-20 rounded-lg bg-cyan-500 p-2 text-center text-xs font-black text-slate-950 shadow">${esc(cls)}</div></div>`;
+  }
   if(f==='z-*')return `<div class="relative h-36 w-64"><div class="absolute left-8 top-6 z-10 h-20 w-32 rounded-xl bg-violet-400 p-3 font-bold text-violet-950">z-10</div><div class="absolute left-24 top-14 h-20 w-32 rounded-xl bg-cyan-400 p-3 font-bold text-cyan-950 ${cls}">${esc(cls)}</div></div>`;
   if(f==='overflow-*')return `<div class="h-28 w-64 border-4 border-slate-300 bg-slate-50 ${cls}"><div class="h-44 w-96 bg-gradient-to-br from-cyan-200 to-violet-200 p-4 font-bold text-slate-900">Contenido más grande que el contenedor → → →<br><br>También ocupa más altura ↓</div></div>`;
   if(f==='aspect-*')return `<div class="w-56 rounded-xl bg-cyan-500 ${cls}"><div class="grid h-full w-full place-items-center p-3 text-center font-black text-slate-950">${esc(cls)}</div></div>`;
   if(f==='object-*')return `<div class="rounded-xl border border-slate-300 bg-slate-50 p-3"><img alt="Demo object fit" class="h-32 w-56 rounded-lg bg-slate-200 ${cls}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='300'%3E%3Crect width='600' height='300' fill='%2306b6d4'/%3E%3Ccircle cx='110' cy='150' r='90' fill='%23facc15'/%3E%3Crect x='260' y='55' width='270' height='190' rx='28' fill='%238b5cf6'/%3E%3C/svg%3E"></div>`;
   if(f.includes('object-* position'))return `<div class="rounded-xl border border-slate-300 bg-slate-50 p-3"><img alt="Demo object position" class="h-32 w-56 rounded-lg bg-slate-200 object-cover ${cls}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='300'%3E%3Crect width='700' height='300' fill='%23e2e8f0'/%3E%3Ccircle cx='90' cy='150' r='80' fill='%23f43f5e'/%3E%3Ccircle cx='610' cy='150' r='80' fill='%2306b6d4'/%3E%3Ctext x='350' y='165' text-anchor='middle' font-size='58' font-family='Arial' fill='%230f172a'%3ECENTRO%3C/text%3E%3C/svg%3E"></div>`;
-  if(f.includes('flex /'))return `<div class="${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A')}${demoBox('B')}${demoBox('C')}</div>`;
+  if(f.includes('flex /'))return `<div class="w-full rounded-xl bg-slate-50 p-3"><div class="${cls} gap-2 border-2 border-dashed border-slate-300 p-3">${demoBox('A')}${demoBox('B')}${demoBox('C')}</div><div class="mt-2 text-[10px] font-bold text-slate-500">El borde muestra el ancho ocupado por ${esc(cls)}.</div></div>`;
   if(f.includes('flex-row'))return `<div class="flex min-h-44 w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3 ${cls}">${demoBox('A')}${demoBox('B')}${demoBox('C')}</div>`;
   if(f==='justify-*')return `<div class="flex w-full ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A')}${demoBox('B')}${demoBox('C')}</div>`;
   if(f==='items-*')return `<div class="flex h-44 w-full ${cls} gap-3 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A','h-10')}${demoBox('B','h-24')}${demoBox('C','h-16')}</div>`;
   if(f.includes('flex-wrap'))return `<div class="flex w-72 ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${['A','B','C','D','E','F'].map(x=>demoBox(x,'w-24 flex-none')).join('')}</div>`;
-  if(f.includes('grow /'))return `<div class="flex w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A','w-20 flex-none')}<div class="${cls} rounded-lg border border-cyan-400 bg-cyan-300 p-3 text-center text-xs font-black text-cyan-950">B · ${esc(cls)}</div>${demoBox('C','w-20 flex-none')}</div>`;
+  if(f.includes('grow /')){
+    if(cls.startsWith('shrink'))return `<div class="flex w-72 gap-2 overflow-hidden rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A','w-36 shrink')}<div class="${cls} w-36 rounded-lg border border-amber-400 bg-amber-200 p-3 text-center text-xs font-black text-amber-950">B · ${esc(cls)}</div>${demoBox('C','w-36 shrink')}</div>`;
+    return `<div class="flex w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A','w-20 flex-none')}<div class="${cls} rounded-lg border border-cyan-400 bg-cyan-300 p-3 text-center text-xs font-black text-cyan-950">B · ${esc(cls)}</div>${demoBox('C','w-20 flex-none')}</div>`;
+  }
   if(f==='basis-*')return `<div class="flex w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="${cls} rounded-lg border border-cyan-400 bg-cyan-300 p-3 text-center text-xs font-black text-cyan-950">A · ${esc(cls)}</div>${demoBox('B','flex-1')}${demoBox('C','flex-1')}</div>`;
-  if(f==='order-*')return `<div class="flex w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A · HTML 1')}<div class="${cls} flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 text-xs font-black text-amber-950">B · HTML 2<br>${esc(cls)}</div>${demoBox('C · HTML 3')}</div>`;
-  if(f.includes('grid /'))return `<div class="${cls} grid-cols-3 gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A')}${demoBox('B')}${demoBox('C')}${demoBox('D')}</div>`;
-  if(f==='grid-cols-*')return `<div class="grid w-full ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${['1','2','3','4','5','6'].map(x=>demoBox(x)).join('')}</div>`;
-  if(f==='grid-rows-*')return `<div class="grid h-52 w-full grid-flow-col ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${['1','2','3','4','5','6'].map(x=>demoBox(x)).join('')}</div>`;
-  if(f.includes('col-span'))return `<div class="grid w-full grid-cols-4 gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="${cls} rounded-lg border border-amber-400 bg-amber-200 p-3 text-center text-xs font-black text-amber-950">DESTACADA · ${esc(cls)}</div>${demoBox('2')}${demoBox('3')}${demoBox('4')}${demoBox('5')}</div>`;
-  if(f.includes('row-span'))return `<div class="grid h-56 w-full grid-cols-3 grid-rows-4 gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="${cls} rounded-lg border border-amber-400 bg-amber-200 p-3 text-center text-xs font-black text-amber-950">${esc(cls)}</div>${['2','3','4','5','6'].map(x=>demoBox(x)).join('')}</div>`;
-  if(f==='place-items-*')return `<div class="grid h-44 w-full grid-cols-3 ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="h-10 w-10 rounded-lg bg-cyan-200 text-center text-xs font-black leading-10 text-cyan-950">A</div><div class="h-16 w-12 rounded-lg bg-violet-200 text-center text-xs font-black leading-[4rem] text-violet-950">B</div><div class="h-12 w-16 rounded-lg bg-amber-200 text-center text-xs font-black leading-[3rem] text-amber-950">C</div></div>`;
-  if(f==='duration-*'||f==='ease-*'||f==='delay-*'||f.startsWith('transition'))return `<div class="group w-full rounded-xl border border-slate-200 bg-slate-50 p-4"><div class="h-12 w-20 rounded-lg bg-cyan-500 ${cls} transition-transform group-hover:translate-x-48"></div><div class="mt-2 text-xs text-slate-500">Pasa el cursor por esta zona para mover el bloque.</div></div>`;
-  if(f.includes('translate-x'))return `<div class="relative h-32 w-full rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"><div class="absolute left-1/2 top-1/2 rounded-lg bg-cyan-500 p-3 font-bold text-slate-950 ${cls}">Origen central</div><div class="absolute left-1/2 top-0 h-full border-l border-dashed border-slate-400"></div></div>`;
-  if(f==='scale-*'||f==='rotate-*'||f==='origin-*')return `<div class="grid h-40 place-items-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"><div class="${cls} rounded-xl bg-cyan-500 p-6 font-black text-slate-950">${esc(cls)}</div></div>`;
+  if(f==='order-*')return `<div class="flex w-full gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${demoBox('A · HTML 1')}<div class="${cls} flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-amber-300 bg-amber-100 px-3 py-2 text-center text-xs font-black text-amber-950">B · HTML 2<br>${esc(cls)}</div>${demoBox('C · HTML 3')}</div>`;
+  if(f.includes('grid /'))return `<div class="w-full rounded-xl bg-slate-50 p-3"><div class="${cls} grid-cols-3 gap-2 border-2 border-dashed border-slate-300 p-3">${demoBox('A')}${demoBox('B')}${demoBox('C')}${demoBox('D')}</div><div class="mt-2 text-[10px] font-bold text-slate-500">El borde muestra el ancho ocupado por ${esc(cls)}.</div></div>`;
+  if(f==='grid-cols-*'){
+    if(cls==='grid-cols-subgrid')return `<div class="grid w-full grid-cols-3 gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="col-span-3 grid grid-cols-subgrid gap-2 rounded-lg border border-violet-300 bg-violet-50 p-2">${demoBox('sub 1')}${demoBox('sub 2')}${demoBox('sub 3')}</div>${demoBox('A')}${demoBox('B')}${demoBox('C')}</div>`;
+    return `<div class="grid w-full ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${['1','2','3','4','5','6'].map(x=>demoBox(x)).join('')}</div>`;
+  }
+  if(f==='grid-rows-*'){
+    if(cls==='grid-rows-subgrid')return `<div class="grid h-56 w-full grid-rows-3 gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="row-span-3 grid grid-rows-subgrid gap-2 rounded-lg border border-violet-300 bg-violet-50 p-2">${demoBox('sub 1')}${demoBox('sub 2')}${demoBox('sub 3')}</div></div>`;
+    return `<div class="grid h-52 w-full grid-flow-col ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3">${['1','2','3','4','5','6'].map(x=>demoBox(x)).join('')}</div>`;
+  }
+  if(f.includes('col-span')){
+    const extra=cls.startsWith('col-start-')?' col-span-2':cls.startsWith('col-end-')?' col-start-2':'';
+    return `<div class="grid w-full grid-cols-12 gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="${cls}${extra} rounded-lg border border-amber-400 bg-amber-200 p-2 text-center text-[10px] font-black text-amber-950">${esc(cls)}</div>${Array.from({length:12},(_,i)=>`<div class="min-h-8 rounded bg-slate-200 text-center text-[9px] font-bold leading-8 text-slate-500">${i+1}</div>`).join('')}</div>`;
+  }
+  if(f.includes('row-span')){
+    const extra=cls.startsWith('row-start-')?' row-span-2':cls.startsWith('row-end-')?' row-start-2':'';
+    return `<div class="grid h-72 w-full grid-cols-3 grid-rows-12 gap-1 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="${cls}${extra} rounded-lg border border-amber-400 bg-amber-200 p-2 text-center text-[10px] font-black text-amber-950">${esc(cls)}</div>${Array.from({length:10},(_,i)=>demoBox(String(i+1))).join('')}</div>`;
+  }
+  if(f==='place-items-*')return `<div class="grid h-44 w-full grid-cols-3 ${cls} gap-2 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-3"><div class="rounded-lg bg-cyan-200 p-2 text-xs font-black text-cyan-950">A pequeño</div><div class="rounded-lg bg-violet-200 p-3 text-2xl font-black text-violet-950">B</div><div class="rounded-lg bg-amber-200 p-2 text-base font-black text-amber-950">C medio</div></div>`;
+  if(f==='hover:*')return `<button class="rounded-xl bg-slate-200 px-6 py-4 font-black text-slate-900 transition ${cls}">Pasa el cursor aquí · ${esc(cls)}</button>`;
+  if(f==='focus-visible:*')return `<button class="rounded-xl border-2 border-slate-300 bg-white px-6 py-4 font-black text-slate-900 ${cls}">Pulsa Tab para enfocarme</button>`;
+  if(f==='active:*')return `<button class="rounded-xl bg-cyan-500 px-6 py-4 font-black text-slate-950 transition ${cls}">Mantén presionado</button>`;
+  if(f==='disabled:*')return `<div class="flex flex-wrap gap-3"><button disabled class="rounded-xl bg-cyan-500 px-5 py-3 font-black text-slate-950 ${cls}">Deshabilitado</button><button class="rounded-xl bg-cyan-500 px-5 py-3 font-black text-slate-950">Normal</button></div>`;
+  if(f.includes('group + group-hover'))return `<div class="group w-full max-w-md rounded-xl border border-slate-300 bg-slate-50 p-5 text-slate-900"><div class="text-xs font-black text-slate-500">PASA EL CURSOR SOBRE TODA LA TARJETA</div><div class="mt-3 rounded-lg bg-slate-200 p-4 font-black text-slate-900 opacity-60 transition ${cls}">Hijo · ${esc(cls)}</div></div>`;
+  if(f.includes('peer + peer-')){const dis=cls.startsWith('peer-disabled:')?' disabled':'';return `<label class="flex w-full max-w-md items-center gap-3 rounded-xl border border-slate-300 bg-slate-50 p-4 text-slate-900"><input${dis} type="checkbox" class="peer h-5 w-5"><span class="rounded-lg bg-slate-200 px-4 py-3 font-bold text-slate-900 transition ${cls}">Tarjeta dependiente · ${esc(cls)}</span></label>`;}
+  if(f.includes('sm:, md:')){
+    const suffix=cls.split(':').slice(1).join(':');
+    if(suffix.startsWith('grid-cols-'))return `<div class="w-full rounded-xl border border-slate-300 bg-slate-50 p-4"><div class="grid ${cls} gap-2">${demoBox('1')}${demoBox('2')}${demoBox('3')}${demoBox('4')}</div><div class="mt-2 text-[10px] font-bold text-slate-500">Redimensiona la ventana para cruzar el breakpoint.</div></div>`;
+    const baseClass=suffix==='block'?'hidden':suffix==='text-lg'?'text-xs':'';
+    return `<div class="w-full rounded-xl border border-slate-300 bg-slate-50 p-4 text-slate-900"><div class="rounded-lg bg-cyan-200 p-4 font-black ${baseClass} ${cls}">OBJETIVO · ${esc(cls)}</div><div class="mt-2 text-[10px] font-bold text-slate-500">Si desaparece, una variante de display está activa. Redimensiona la ventana para comparar.</div></div>`;
+  }
+  if(f.startsWith('max-sm:'))return `<div class="w-full rounded-xl border border-slate-300 bg-slate-50 p-4 text-slate-900"><div class="rounded-lg bg-cyan-200 p-4 font-black ${cls}">OBJETIVO · ${esc(cls)}</div><div class="mt-2 text-[10px] font-bold text-slate-500">Redimensiona la ventana: esta variante trabaja por debajo de un ancho máximo.</div></div>`;
+  if(f.includes('@container + @sm')){
+    const suffix=cls.split(':').slice(1).join(':');
+    const content=suffix.startsWith('grid-cols-')?`<div class="grid ${cls} gap-2">${demoBox('1')}${demoBox('2')}${demoBox('3')}${demoBox('4')}</div>`:`<div class="rounded-lg bg-slate-200 p-4 text-sm font-black text-slate-900 ${cls}">${esc(cls)}</div>`;
+    return `<div class="@container w-72 max-w-full resize-x overflow-auto rounded-xl border-2 border-cyan-400 bg-cyan-50 p-4"><div class="mb-2 text-[10px] font-black text-cyan-800">ARRASTRA EL BORDE DERECHO DEL CONTENEDOR</div>${content}</div>`;
+  }
+  if(f==='dark:*'){
+    const base=cls.replace(/^dark:/,'');
+    let darkTarget='';
+    if(base.startsWith('bg-'))darkTarget=`<div class="mt-2 rounded-lg p-4 font-black text-white ${base}">${esc(cls)}</div>`;
+    else if(base.startsWith('text-'))darkTarget=`<div class="mt-2 rounded-lg bg-slate-800 p-4 font-black ${base}">${esc(cls)}</div>`;
+    else if(base.startsWith('border-'))darkTarget=`<div class="mt-2 rounded-lg border-4 bg-slate-800 p-4 font-black text-white ${base}">${esc(cls)}</div>`;
+    else if(base.startsWith('hover:'))darkTarget=`<div class="mt-2 rounded-lg bg-slate-700 p-4 font-black text-white transition ${base}">Pasa el cursor · ${esc(cls)}</div>`;
+    else darkTarget=`<div class="mt-2 rounded-lg bg-slate-800 p-4 font-black text-white ${base}">${esc(cls)}</div>`;
+    return `<div class="grid w-full gap-3 sm:grid-cols-2"><div class="rounded-xl border border-slate-200 bg-white p-4 text-slate-900"><div class="text-[10px] font-black text-slate-500">ESTADO CLARO</div><div class="mt-2 rounded-lg border border-slate-300 bg-slate-100 p-4">Sin la variante</div></div><div class="rounded-xl border border-slate-700 bg-slate-950 p-4 text-white"><div class="text-[10px] font-black text-slate-400">ESTADO OSCURO · SIMULACIÓN</div>${darkTarget}</div></div>`;
+  }
+  if(f==='duration-*'||f==='ease-*'||f==='delay-*')return `<div class="group w-full rounded-xl border border-slate-200 bg-slate-50 p-4"><div class="h-12 w-20 rounded-lg bg-cyan-500 transition-transform ${cls} group-hover:translate-x-48"></div><div class="mt-2 text-xs text-slate-500">Pasa el cursor por esta zona para mover el bloque.</div></div>`;
+  if(f.startsWith('transition'))return `<div class="group w-full rounded-xl border border-slate-200 bg-slate-50 p-4"><div class="h-14 w-28 rounded-lg bg-cyan-500 p-2 text-center text-xs font-black text-slate-950 duration-700 ${cls} group-hover:translate-x-32 group-hover:bg-violet-500 group-hover:opacity-50 group-hover:shadow-2xl">hover</div><div class="mt-2 text-xs text-slate-500">Hover modifica posición, color, opacidad y sombra.</div></div>`;
+  if(f.includes('translate-x'))return `<div class="relative h-40 w-full overflow-visible rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"><div class="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-rose-500"></div><div class="absolute left-1/2 top-0 h-full border-l border-dashed border-slate-400"></div><div class="absolute left-0 top-1/2 w-full border-t border-dashed border-slate-400"></div><div class="absolute left-1/2 top-1/2 rounded-lg bg-cyan-500 p-3 font-bold text-slate-950 ${cls}">${esc(cls)}</div></div>`;
+  if(f==='scale-*'||f==='rotate-*')return `<div class="relative grid h-44 place-items-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"><div class="absolute h-16 w-32 rounded-xl border-2 border-dashed border-slate-400"></div><div class="${cls} rounded-xl bg-cyan-500 p-6 font-black text-slate-950">${esc(cls)}</div></div>`;
+  if(f==='origin-*')return `<div class="relative grid h-52 place-items-center overflow-visible rounded-xl border-2 border-dashed border-slate-300 bg-slate-50"><div class="absolute h-20 w-40 rounded-xl border-2 border-dashed border-slate-400"></div><div class="${cls} h-20 w-40 rotate-12 rounded-xl bg-cyan-500 p-4 text-center font-black text-slate-950 shadow">${esc(cls)}<br><span class="text-[10px]">+ rotate-12</span></div></div>`;
+  if(f.includes('appearance-'))return `<div class="grid w-full max-w-lg gap-4 sm:grid-cols-2"><label class="text-xs font-bold text-slate-600">OBJETIVO<select class="mt-2 w-full rounded-lg border-2 border-cyan-400 bg-white p-3 text-slate-900 ${cls}"><option>Opción A</option><option>Opción B</option></select></label><label class="text-xs font-bold text-slate-600">REFERENCIA<select class="mt-2 w-full rounded-lg border-2 border-slate-300 bg-white p-3 text-slate-900"><option>Opción A</option><option>Opción B</option></select></label></div>`;
+  if(f==='accent-*')return `<div class="flex flex-wrap items-center gap-6 rounded-xl bg-slate-50 p-5 text-slate-900"><label class="flex items-center gap-2"><input checked type="checkbox" class="h-5 w-5 ${cls}"> Checkbox</label><label class="flex items-center gap-2"><input checked type="radio" class="h-5 w-5 ${cls}"> Radio</label><input type="range" value="65" class="w-40 ${cls}"></div>`;
+  if(f==='caret-*')return `<div class="w-full max-w-md"><input autofocus value="Haz clic aquí y mueve el cursor" class="w-full rounded-xl border-2 border-slate-300 bg-white p-4 text-slate-900 outline-none focus:border-cyan-500 ${cls}"><div class="mt-2 text-[10px] font-bold text-slate-500">El caret es la barra vertical de escritura, no el color del texto.</div></div>`;
+  if(f==='placeholder:*')return `<input placeholder="Este texto es el placeholder" class="w-full max-w-md rounded-xl border-2 border-slate-300 bg-white p-4 text-slate-900 ${cls}">`;
+  if(f==='resize-*')return `<textarea class="h-32 w-72 overflow-auto rounded-xl border-2 border-cyan-400 bg-white p-3 text-sm text-slate-900 ${cls}">Intenta arrastrar la esquina inferior derecha para comprobar ${esc(cls)}.</textarea>`;
   return `<div class="utility-demo-target border border-slate-300 bg-slate-100 p-3 text-slate-900 ${cls}">${esc(cls)}</div>`;
 }
 function utilityExplorerHTML(p){
